@@ -1,0 +1,29 @@
+<!doctype html>
+<title>Flaskr</title>
+<link rel=stylesheet type=text/css href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript">
+ 
+$(document).ready(function() {
+    $('#example').DataTable( {
+        ajax: {
+          url: '/data',
+          dataSrc: "dataSet",
+        },
+        columns: [
+            { title: "Title", data: '_source.title' },
+            { title: "Authors", data: '_source.authors' },
+            { title: "Publish Date", data: '_source.publish_date' },
+        ]
+    } );
+} );
+
+
+</script>
+
+<div class=page>
+
+  <h1>Flaskr</h1>
+  <table id="example" style="width:100%"></table>
+</div>
