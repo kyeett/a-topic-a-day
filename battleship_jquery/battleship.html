@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+<!-- JQUERY -->
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+
+<!-- BOOTSTRAP -->
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+
+<script type="text/javascript">
+
+  function getRandomCell()
+  {
+    var nCells = $("td.cell").length
+    var random = Math.floor( Math.random() * nCells );
+    return $("td.cell:eq("+ random + ")");
+  }
+
+
+  function createBoard(mode)
+  {
+    $('#board').fadeTo("fast", 1.00);
+    $('#difficulty').text(mode);
+    $('#n_clicks').text(0);
+    $('#n_sunk_boats').text(0);
+    if(mode == "easy")
+    {
+      size = 5;
+      nBoats = 3;
+    }
+    else if (mode == "medium")
+    {
+      size = 10;
+      nBoats = 4
+    }
+    else if (mode == "hard")
+    {
+      size = 15;
+      nBoats = 5;
+    }
+
+    console.log('Create board');
+
+    // Create table
+    $('#board').html('');
+    $('#board').css('width',size*50);
+    $('#board').css('height',size*50);
+
+
+    for (var i = 0; i < size; i++) {
+
+        // Create a row
+        var row = $('<tr></tr>');
+        for (var j = 0; j < size; j++) {
+
+          // Add cell to row
+          $(row).append('<td class="cell">&nbsp;</td>');
+        }
+        $('#board').append(row);
+        console.log('Add row');
+    }
+
+    console.log('Add boats');
+    while(nBoats > 0)
+    {
+      // Get a radnom coordinate
+      cell = getRandomCell();
+      if(cell.hasClass('boat') == false)
+      {
+        // Found empty cell, add boat there
+        cell.addClass('boat');
+        nBoats--;
+      }
+    }
+
+    //Add click trigger to all cells
+
+    $( ".cell" ).on( "click", function() {
+
+      handleClick($(this));
+
+    });
+  }
+  function handleClick(element)
+  {
+    if(element.hasClass('sunken') || element.text() == 'X')
+    {
+      //Already clicked. Ignore!
+      return
+    }
+    else if(element.hasClass('boat'))
+    {
+      updateClicks();
+      updateSunkBoats();
+      element.addClass('sunken');
+      element.text('X');
+    }
+    else {
+      updateClicks();
+      element.text('X');
+    }
+
+    checkWinCondition();
+  }
+
+  function checkWinCondition() {
+    var nBoats = $("td.boat").length
+    var nSunken = $("td.sunken").length
+
+    if(nBoats == nSunken)
+    {
+      //Fade board
+      $('#board').fadeTo("slow", 0.33);
+
+      //Update highscore
+      updateHighscore();
+
+      //Remove click from board
+      $( ".cell" ).off( "click" );
+    }
+  }
+
+  function updateHighscore()
+  {
+    difficulty = $('#difficulty').text();
+    n_clicks = parseInt($('#n_clicks').text());
+    current_highscore = $("#" + difficulty + "_highscore").text();
+
+    if(current_highscore == "-")
+    {
+      // No previous highscore, just add current # clicks
+      $("#" + difficulty + "_highscore").text(n_clicks);
+    }
+    else {
+
+      // No previous highscore, just add current # clicks
+      if(n_clicks < parseInt(current_highscore)) {
+        $("#" + difficulty + "_highscore").text(n_clicks);
+      }
+      else {
+        //Do nothing
+      }
+    }
+
+
+  }
+
+  function updateClicks() {
+    previousNum = parseInt($('#n_clicks').text());
+    num = previousNum + 1;
+    $('#n_clicks').text(num)
+  }
+
+  function updateSunkBoats() {
+    previousNum = parseInt($('#n_sunk_boats').text());
+    num = previousNum + 1;
+    $('#n_sunk_boats').text(num)
+  }
+
+  $(document).ready(function() {
+
+    $('button').click(function() {
+      console.log('New Game');
+      difficulty = $(this).text().toLowerCase();
+      createBoard(difficulty);
+    });
+
+      createBoard("easy");
+  });
+
+
+
+</script>
+<style type="text/css">
+
+  #new_game {
+    clear: both;
+    padding-top: 20px;
+    margin-left: 50px;
+  }
+
+  table {
+    margin-top: 50px;
+    margin-left: 50px;
+    padding: 10px;
+    border: 2px solid black;
+    float: left;
+    table-layout: fixed;
+  }
+
+  td {
+    padding: 10px;
+    border: 1px solid black;
+  }
+
+  .cell {
+    height: 30px;
+    width: : 40px;
+    background-color: lightblue;
+    text-align: center;
+  }
+
+  .boat {
+    background-color: lightblue;
+  }
+
+  .sunken {
+    background-color: darkblue;
+  }
+
+</style>
+<body>
+
+  <!--
+  <meta http-equiv="refresh" content="1">
+  -->
+
+<div style="float:left">
+  <table id="board"></table>
+
+  <div id="new_game">
+    <label>New game:</label>
+    <button type="button" class="btn btn-success">Easy</button>
+    <button type="button" class="btn btn-warning">Medium</button>
+    <button type="button" class="btn btn-danger">Hard</button>
+
+  </div>
+
+</div>
+
+<div style="float:left">
+
+
+  <table>
+
+
+  <tr>
+    <td colspan="2"><h2>Current game</h2></td>
+  </tr>
+
+
+    <tr>
+      <td><label># clicks</label></td>
+      <td><div id="n_clicks">0</div></td>
+    </tr>
+    <tr>
+      <td><label># sunk boats</label></td>
+      <td><div id="n_sunk_boats">0</div></td>
+    </tr>
+    <tr>
+      <td><label>Difficulty</label></td>
+      <td><div id="difficulty">easy</div></td>
+    </tr>
+
+  <tr>
+    <td colspan="2"><h2>Highscore!</h2></td>
+  </tr>
+
+<tr>
+    <td><label>Difficulty</label></td>
+    <td><label># clicks</label></td>
+  </tr>
+
+  <tr>
+    <td><label>Easy</label></td>
+    <td><div id="easy_highscore">-</div></td>
+  </tr>
+
+  <tr>
+    <td><label>Medium</label></td>
+    <td><div id="medium_highscore">-</div></td>
+  </tr>
+
+  <tr>
+    <td><label>Hard</label></td>
+    <td><div id="hard_highscore">-</div></td>
+  </tr>
+
+</table>
+</div>
+
+</body>
+</html>
